@@ -16,7 +16,24 @@ app.use(cors({
 
  app.use(express.static("public")) // serve static public for the whole pdf png 
 app.use(cookieParser());
- 
+
+
+//routes
+
+import router from "./routes/user.router";
+
+app.use("/api/v1/users", router);
+// http:localhost:8000/api/v1/user/register
+//for login router url 
+//http:localhost:8000/api/v1/user/login
+
+
+
+
+
+
+
+
 export {app}
 
 
