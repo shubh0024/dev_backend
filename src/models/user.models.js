@@ -64,8 +64,9 @@ refreshToken:{
 //we write here async bcz these function take time 
 userSchemas.pre("save", async function(next) {
     if(!this.isModified("password")) return next();
-    this.password=bcrypt.hash(this.password,10)
-    next();
+
+    this.password = await bcrypt.hash(this.password,10)
+    next()
 })
 
 userSchemas.method.isPasswordCorrect=async function(password) {

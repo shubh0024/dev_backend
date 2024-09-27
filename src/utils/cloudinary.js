@@ -35,3 +35,4 @@ const uploadOnCloudinary = async (localfilepath)=>{ //pass the argument as local
         console.log("error ",error);
     }
 }
+export {uploadOnCloudinary}

@@ -9,8 +9,7 @@ class ApiResponse {
     }
 }
 
-export default ApiResponse;
-
+export  {ApiResponse}
 
 // server statusCode
 
