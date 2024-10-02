@@ -6,10 +6,10 @@ class ApiError extends Error {
         errors=[],
         stack=""
     ){
-        super(Messaage)
+        super(message)
         this.statusCode =statusCode
         this.data=  null
-        this.Messaage=message
+        this.message=message
         this.success=false;
         this.errors=errors
 

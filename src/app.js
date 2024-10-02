@@ -1,9 +1,19 @@
 import express from "express"
-
-import cors from "cor"
+import cors from "cors"
 import cookieParser from "cookie-parser" //it can be used for the cookie parsing logic and where server will start responding with cookies
+import Userouter from "./routes/user.router.js";
 
 const app = express();
+
+// app.get('/', (req, res) => {
+//     res.send('API is running...');
+//   });
+//routes
+
+
+
+
+
 
 app.use(cors({
     origin: "process.env.CORS_ORIGIN", // replace with your frontend URL
@@ -18,11 +28,9 @@ app.use(cors({
 app.use(cookieParser());
 
 
-//routes
+app.use("/api/v1/users", Userouter);
 
-import router from "./routes/user.router";
 
-app.use("/api/v1/users", router);
 // http:localhost:8000/api/v1/user/register
 //for login router url 
 //http:localhost:8000/api/v1/user/login
@@ -34,7 +42,7 @@ app.use("/api/v1/users", router);
 
 
 
-export {app}
+export default app;
 
 
 //(err,res,resp, next) 

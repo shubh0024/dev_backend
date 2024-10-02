@@ -1,20 +1,24 @@
 import { Router } from "express";
-import registerUser from "../controllers/user.controllers";
+import registerUser from "../controllers/user.controllers.js";
 
 import {upload} from "../middlewares/multer.middleware.js"
 
 // register route
 const router= Router()
 
-router.route("/register").post(
-    //midleware injecting 
+// router.get('/register',(req,res)=>{
+//     res.json([{id:1,name:'john doe',email:'john@example.com'}]);
+// })
+
+router.route('/register').post(
+   // midleware injecting 
     upload.fields([
         {
-            name:'profile',
+            name:'avatar',
             maxCount:1
         },
         {
-            name:'cover',
+            name:'coverImage',
             maxCount:1
         }
     ]),
