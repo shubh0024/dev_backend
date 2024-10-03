@@ -24,11 +24,11 @@ const uploadOnCloudinary = async (localfilepath)=>{ //pass the argument as local
 
        
 
- // Delete the local file after upload
- if (fs.existsSync(localfilepath)) {
-    fs.unlinkSync(localfilepath);
-    console.log("Local file deleted after upload.");
-}
+//  // Delete the local file after upload
+//  if (fs.existsSync(localfilepath)) {
+//     fs.unlinkSync(localfilepath);
+//     console.log("Local file deleted after upload.");
+//}
 return result.url; //it can be return to user
 
     }catch(error){

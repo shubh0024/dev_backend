@@ -59,7 +59,7 @@ console.log({fullName,email,username,password})
 
      const user=await User.create({
                       fullName,
-                      avatar:avatar.url,
+                      avatar:avatar, //not necessary to pass the url of the image
                       coverImage:coverImage?.url || "",
                       email,
                       username:username.toLowerCase(),

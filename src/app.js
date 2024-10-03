@@ -11,10 +11,6 @@ const app = express();
 //routes
 
 
-
-
-
-
 app.use(cors({
     origin: "process.env.CORS_ORIGIN", // replace with your frontend URL
     credentials: true,
