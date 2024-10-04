@@ -4,7 +4,32 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 import {User} from '../models/user.models.mjs';
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
+
+const generateAccessandRefreshTokens= async(userId)=>{
+  try{
+   const user= await User.findById(userId)
+   const accessToken= user.generateAccesToken()
+  const refreshToken=user.generatRefreshToken() //add it to db
+
+  user.refreshToken = refreshToken
+  user.save({validateBeforeSave:false})
+  //  await user.save()
+  return {accessToken,refreshToken}
+
+
+  }catch(error){
+    throw new ApiError(500,"Error fetching",500)
+  }
+}
+
+//get userdetails from frontend 
+//validation -not empty
+//check user if already registered :user eamil
+//check for images ,check for avatar
+//upload for cloudinary ,avatar for cloudinary
+//create user object -create entry in db
 const registerUser = asyncHandler(async (req,res)=>{
   // return res.status(200).json({
   //       message: "User registered successfully"
@@ -91,12 +116,102 @@ console.log({fullName,email,username,password})
 
 })
 
-//get userdetails from frontend 
-//validation -not empty
-//check user if already registered :user eamil
-//check for images ,check for avatar
-//upload for cloudinary ,avatar for cloudinary
-//create user object -create entry in db
 
-export default registerUser
+const loginUser = asyncHandler(async,(req,res)=>{
+ //req body ->data
+  //require email and password
+ //checks if email and psswrd input correctly
+ //check for login credentials
+ //if credentials are correct generate token
+ //if not throw error
+//send cookies
+
+const {email,username,password} =req.body
+
+if(!email ||!username){
+    throw new ApiError("Please provide email and username ",400)
+}
+
+
+
+const user=User.findOne({
+  $or:[{email},{username}]
+})
+
+if(!user){
+  throw new ApiError("User not found",401);
+}
+
+const isPasswordValid = user.isPasswordValid(password);
+
+if(!isPasswordValid){
+  throw new  ApiError(401,"Inavlid user credentials ")
+}
+
+const {accessToken,refreshToken} =  generateAccessandRefreshTokens(user._id)
+
+const loggedinUser =  User.findById(user._id);
+select("-password -refreshToken")
+
+const options = {
+  httpOnly:true,
+  secure:true
+}
+
+return res
+.status(200)
+.cookie("accessToken",accessToken,options)
+.cookie("refreshToken",refreshToken,options)
+.json(
+  new ApiResponse(
+    200,
+    {
+      user:loggedinUser,accessToken
+      // message:"User logged in successfully"
+    },
+    "User logged in successfully"
+  )
+)
+})
+
+//now logout fuction declared
+
+const logoutUser = asyncHandler(async(req,res)=>{
+  await User.findByIdAndUpdate(
+    req.user._id,{
+      $set:{
+        refreshToken:undefined,
+
+      }
+    },{
+      new:true //u can take new value inplace of existed val
+    }
+  )
+
+  const options = {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+    secure: true
+  }
+
+  //coookies clear the cache
+  return res
+ .status(200)
+ .clearCookie("accessToken",options)
+ .clearCookie("refreshToken",options)
+ .json(
+    new ApiResponse(
+      200,
+      {},
+      "User logged out successfully"
+    )
+  )
+})
+
+
+export default {
+   registerUser,
+   loginUser,
+   logoutUser
+}
 
