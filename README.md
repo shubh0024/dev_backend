@@ -1,6 +1,3 @@
-Here’s a customized `README.md` for a MERN stack backend server:
-
----
 
 # MERN Stack Backend Server
 
@@ -97,14 +94,14 @@ NODE_ENV=development
 - **POST** `/api/auth/register` - Register a new user
 - **POST** `/api/auth/login` - Log in a user
 
-### Example Entity (Replace with your actual resources)
+### Example 
 
-- **GET** `/api/resource` - Get all resources
-- **POST** `/api/resource` - Create a new resource
-- **PUT** `/api/resource/:id` - Update a resource by ID
-- **DELETE** `/api/resource/:id` - Delete a resource by ID
+- **GET** `/api/v1/users` - Get all resources
+- **POST** `/api/v1/new` - Create a new resource
+- **PUT** `/api/v1/:id` - Update a resource by ID
+- **DELETE** `/api/v1/:id` - Delete a resource by ID
 
-[Add other API endpoints relevant to your project here]
+
 
 ## Database Schema
 
@@ -117,7 +114,7 @@ The backend uses MongoDB to store data, with Mongoose for modeling the database.
   - `password`: String (hashed)
   - `createdAt`: Date
 
-[Include descriptions for any other models your project uses]
+
 
 ## Testing
 
@@ -135,6 +132,4 @@ Contributions are welcome! If you'd like to contribute, fork the repository, cre
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
----
 
-Feel free to adjust this template to better match your project’s specific features and needs!
