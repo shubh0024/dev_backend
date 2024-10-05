@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
-import pkg from 'bcrypt';
-const {bcrypt} = pkg;
+// import pkg from 'bcrypt';
+// const {bcrypt} = pkg;
+import bcrypt from 'bcryptjs';
 
 import jwt from 'jsonwebtoken'; // bearer token
 
@@ -64,13 +65,13 @@ const userSchema = new Schema({
 // Pre-save hook to hash the password
 userSchema.pre("save", async function(next) {
     if (!this.isModified("password")) return next();
-    this.password = await pkg.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 
 // Method to compare passwords
-userSchema.methods.isPasswordCorrect = async function(password) {
-    return await bcrypt.compare(password, this.password);
+userSchema.methods.isPasswordValid = async function(enterpassword) {
+    return await bcrypt.compare(enterpassword, this.password);
 };
 
 // Method to generate access token

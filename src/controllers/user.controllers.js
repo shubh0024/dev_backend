@@ -9,11 +9,14 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const generateAccessandRefreshTokens= async(userId)=>{
   try{
-   const user= await User.findById(userId)
-   const accessToken= user.generateAccesToken()
-  const refreshToken=user.generatRefreshToken() //add it to db
 
-  user.refreshToken = refreshToken
+    // console.log(user);
+
+   const user= await User.findById(userId)
+   const accessToken= user.generateAccessToken()
+  const refreshToken=user.generateRefreshToken() //add it to db
+
+  user.refreshToken = refreshToken;
   user.save({validateBeforeSave:false})
   //  await user.save()
   return {accessToken,refreshToken}
@@ -30,7 +33,7 @@ const generateAccessandRefreshTokens= async(userId)=>{
 //check for images ,check for avatar
 //upload for cloudinary ,avatar for cloudinary
 //create user object -create entry in db
-const registerUser = asyncHandler(async (req,res)=>{
+const registerUser = asyncHandler(async(req,res)=>{
   // return res.status(200).json({
   //       message: "User registered successfully"
 // })
@@ -91,7 +94,8 @@ console.log({fullName,email,username,password})
                       password
       })
 
-         const createUser=  await User.findById(user._id).select(
+         const createUser=  await User.findById(user._id).
+         select(
             "-password -refreshToken" //it not necesary to get the refresh token or password
 
          )
@@ -117,7 +121,7 @@ console.log({fullName,email,username,password})
 })
 
 
-const loginUser = asyncHandler(async,(req,res)=>{
+const loginUser = asyncHandler(async(req,res)=>{
  //req body ->data
   //require email and password
  //checks if email and psswrd input correctly
@@ -126,15 +130,21 @@ const loginUser = asyncHandler(async,(req,res)=>{
  //if not throw error
 //send cookies
 
-const {email,username,password} =req.body
+const {email ,username,password} = req.body
 
-if(!email ||!username){
-    throw new ApiError("Please provide email and username ",400)
+console.log(req.body)
+// if(!username || !password)
+
+if (!password || (!email && !username)) {
+  return res.status(400).json({ message: 'Email/Username and password are required' });
 }
 
+// if(!(email && username)){
+//   throw new ApiError("Please provide email and username ",400)
+ 
 
-
-const user=User.findOne({
+//find the user by email and password
+const user=await User.findOne({
   $or:[{email},{username}]
 })
 
@@ -142,16 +152,25 @@ if(!user){
   throw new ApiError("User not found",401);
 }
 
-const isPasswordValid = user.isPasswordValid(password);
+const isValidPassword = await user.isPasswordValid(password);
 
-if(!isPasswordValid){
+if(!isValidPassword){
   throw new  ApiError(401,"Inavlid user credentials ")
 }
 
-const {accessToken,refreshToken} =  generateAccessandRefreshTokens(user._id)
+const {accessToken,refreshToken} = await generateAccessandRefreshTokens(user._id)
 
-const loggedinUser =  User.findById(user._id);
-select("-password -refreshToken")
+const loggedinUser =await  User.findById(user._id).
+select("-password -refreshToken");
+
+const userResponse = {
+  _id: loggedinUser._id,
+  fullName: loggedinUser.fullName,
+  email: loggedinUser.email,
+  username: loggedinUser.username,
+  avatar: loggedinUser.avatar,
+  coverImage: loggedinUser.coverImage
+};
 
 const options = {
   httpOnly:true,
@@ -166,7 +185,7 @@ return res
   new ApiResponse(
     200,
     {
-      user:loggedinUser,accessToken
+      user:userResponse,accessToken
       // message:"User logged in successfully"
     },
     "User logged in successfully"
@@ -179,17 +198,15 @@ return res
 const logoutUser = asyncHandler(async(req,res)=>{
   await User.findByIdAndUpdate(
     req.user._id,{
-      $set:{
-        refreshToken:undefined,
-
-      }
-    },{
+      $set:{refreshToken:undefined}
+    },
+    {
       new:true //u can take new value inplace of existed val
     }
   )
 
-  const options = {
-    expires: new Date(Date.now()),
+  const options = { 
+    // expires: new Date(Date.now()),
     httpOnly: true,
     secure: true
   }
@@ -209,7 +226,7 @@ const logoutUser = asyncHandler(async(req,res)=>{
 })
 
 
-export default {
+export {
    registerUser,
    loginUser,
    logoutUser
