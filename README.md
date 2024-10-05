@@ -62,11 +62,17 @@ This repository contains the backend server for the youtube-clone. It is built u
 Create a `.env` file in the root directory and add the following environment variables:
 
 ```
-PORT=5000
-MONGO_URI=your-mongodb-uri
-JWT_SECRET=your-jwt-secret
-NODE_ENV=development
-[Other environment variables specific to your project]
+PORT=8000
+MONGODB_URI=
+DB_NAME=
+CORS_ORIGIN=
+ACCESS_TOKEN_SECRET=
+ACCESS_TOKEN_EXPIRY=
+REFRESH_TOKEN_SECRET=
+REFRESH_TOKEN_EXPIRY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 ```
 
 ## Running the Server
