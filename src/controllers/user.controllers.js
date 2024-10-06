@@ -375,7 +375,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError("Failed to upload CoverImage",400)
   }
   
-  await User.findByIdAndUpdate(
+  const user =await User.findByIdAndUpdate(
     req.user?.id,{
       $set:{coverImage=coverImage.url}
     },{
@@ -386,7 +386,10 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
   return res
   .status(200)
-  .json(new ApiResponse(200,user,"user coverImage uploaded succesfully"))
+  .json(new ApiResponse(
+    200,
+    user,
+    "user coverImage uploaded succesfully"))
   
 
   })
@@ -400,6 +403,7 @@ export {
    changeCurrentPassword,
    getCurrentUser,
    updateAccountDetails,
-   updateUserAvatar
+   updateUserAvatar,
+   updateUserCoverImage
 }
 
