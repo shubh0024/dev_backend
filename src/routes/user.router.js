@@ -1,5 +1,17 @@
 import { Router } from "express"
-import { registerUser, loginUser, logoutUser,refreshAccessToken} from "../controllers/user.controllers.js";
+import { 
+    registerUser, 
+    loginUser, 
+    logoutUser,
+    refreshAccessToken, 
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateUserAvatar,
+    updateUserCoverImage,
+    getUserChannelProfile,
+    getwatchHistory
+}  from "../controllers/user.controllers.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {upload} from "../middlewares/multer.middleware.js"
@@ -37,6 +49,18 @@ router.route("/logout").post(verifyJWT,logoutUser)
 //refreshToken the token when session get expired by user 
 //we didnt uses the verifyJwt already handled in the decodedToeken method
 router.route("/refresh-token").post(refreshAccessToken)
+
+router.route("/change-password").post(verifyJWT,changeCurrentPassword)
+router.route("/current-user").get(verifyJWT,getCurrentUser)
+router.route("/update-account").patch(verifyJWT,updateAccountDetails)
+
+router.route("/update-avatar").patch(verifyJWT,upload.single('avatar'),updateUserAvatar)
+
+router.route("/update-cover-image").patch(verifyJWT,upload.single('coverImage'),updateUserCoverImage)
+
+router.route("/c/:username").get(verifyJWT,getUserChannelProfile)
+
+router.route("/History").get(verifyJWT,getwatchHistory)
 
 export default router
 
