@@ -286,19 +286,20 @@ const  changeCurrentPassword = asyncHandler(async(req,res)=>{
       throw new ApiError(400,"Inavalid old password")
      }
 
-     user.password = newPassowrd
+     user.password = newPassword
 
      await user.save({validateBeforeSave:true})
 
      return res.
      status(200)
-     .json(new ApirResponse200,{},"Password changer successfully")
+     .json(new ApiResponse(200,{},"Password changer successfully"))
 })
 
 const getCurrentUser = asyncHandler(async(req,res)=>{
   return res
   .status(200)
-  .json(200,req.user,"current user fetched successfully")
+  .json(new ApiResponse(
+    200,req.user,"current user fetched successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async(req,res)=>{
@@ -335,15 +336,19 @@ if(!avatarLocalPath){
   throw new ApiError("Please upload avatar",400);
 }
 
+//delete the avatar file locally
+
+  fs.unlinkSync(avatarLocalPath)
 const avatar= await uploadOnCloudinary(avatarLocalPath)
 
 if(!avatar.url){
   throw new ApiError("Failed to upload avatar",400)
 }
 
+
 const user = await User.findByIdAndUpdate(
-  req.user?.id,{
-    $set:{avatar=avatar.url}
+  req.user?._id,{
+    $set:{avatar:avatar.url}
   },{
     new:true
   }
@@ -377,7 +382,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   
   const user =await User.findByIdAndUpdate(
     req.user?.id,{
-      $set:{coverImage=coverImage.url}
+      $set:{coverImage : coverImage.url}
     },{
       new:true
     }
@@ -395,6 +400,140 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   })
 
 
+
+  const getUserChannelProfile = asyncHandler(async(req,res)=>{
+    const {username} =req.params
+
+    if(!username){
+      throw new ApiError(400,"username not found!")
+    }
+
+    //get the channel details from the using aggregation pipeline
+    const channel = await User.aggregate([
+      {
+        $match:{
+          username:username?.toLowerCase()
+        }
+      },
+      {
+        $lookup:{
+          from:"subscriptions",
+         localField:"_id",
+         foreignField:"channel",
+         as:"subscribers"
+        }
+      },
+      {
+        $lookup:{
+          from:"subscriptions",
+         localField:"_id",
+         foreignField:"subscriber",
+         as:"subscribedTo"
+        }
+
+      },
+      {
+        $addFields: {
+          subscribersCount:{
+            $size:"$subscribers"
+          },
+          channelsSubscribedToCount:{
+            $size:"$subscribedTo"
+            }
+            , 
+            isSubscribed:{
+                $cond:{
+                  if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                  then:true,
+                  else:false
+                }
+
+              }
+            }
+          },
+          {
+            //projection the slected things
+            $project:{
+              _id:1,
+              fullName:1,
+              email:1,
+              username:1,
+              avatar:1,
+              coverImage:1,
+              subscribersCount:1,
+              channelsSubscribedToCount:1,
+              isSubscribed:1
+            }
+          }
+        
+     ])
+
+
+if(!channel?.length){
+  throw new ApiError(404,"User not found!")
+}
+
+return res.status(200)
+.json(new ApiResponse(200,channel[0],"user channel fetched successfully"))
+})
+
+
+const getwatchHistory = asyncHandler(async(req,res)=>{
+//u will string in the mongodb
+     const user = await User.aggregate([
+      {
+        $match:{
+          _id:new mongoose.Types.ObjectId(req.User._id)
+        }
+      },{
+        $lookup:{
+          from:"videos",
+          localField:"watchHistory",
+          foreignField:"_id",
+          as:"watchHistory",
+
+          //we can use nested  pipeline using the following
+          pipeline:[
+            {
+              $lookup:{
+                  from:"users",
+                  localField:"owner",
+                  foreignField:"_id",
+                  as:"ownerInfo",
+
+                     //add additional fields to the user info
+                  pipeline:[
+                    {
+                      $project:{
+                        _id:1,
+                        fullName:1,
+                        username:1,
+                        avatar:1
+                      }
+                    }
+                  ]
+
+              }
+            },
+            {
+              //for the easiet way to extract the deatails
+              $addFields:{
+                owner:{
+                  $first:"$owner"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ])
+
+    return res.status(200)
+    .json(new ApiResponse(200,user[0].watchHistory,"watchHIstory"))
+})
+
+
+
 export {
    registerUser,
    loginUser,
@@ -404,6 +543,8 @@ export {
    getCurrentUser,
    updateAccountDetails,
    updateUserAvatar,
-   updateUserCoverImage
+   updateUserCoverImage,
+   getUserChannelProfile,
+   getwatchHistory
 }
 
